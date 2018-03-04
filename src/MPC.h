@@ -4,6 +4,8 @@
 #include <vector>
 #include "Eigen-3.3/Eigen/Core"
 
+#define HAVE_CSTDDEF
+
 using namespace std;
 
 class MPC {
