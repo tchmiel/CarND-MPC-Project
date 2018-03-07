@@ -1,33 +1,41 @@
 #ifndef DebugMPC_H
 #define DebugMPC_H
 
-
+#include <string>
+#include <vector>
 
 using namespace std;
 
 class DebugMPC {
-    std::vector<double> x_vals = {};
-    std::vector<double> y_vals = {};
-    std::vector<double> psi_vals = {};
-    std::vector<double> v_vals = {};
-    std::vector<double> cte_vals = {};
-    std::vector<double> epsi_vals = {};
-    std::vector<double> delta_vals = {};
-    std::vector<double> a_vals = {};
+    std::vector<double> x_vals_ = {};
+    std::vector<double> y_vals_ = {};
+    std::vector<double> psi_vals_ = {};
+    std::vector<double> v_vals_ = {};
+    std::vector<double> cte_vals_ = {};
+    std::vector<double> epsi_vals_ = {};
+    std::vector<double> delta_vals_ = {};
+    std::vector<double> a_vals_ = {};
 
- public:
-  DebugMPC();
+    bool plotIterations_ = false;
+    int num_iterations_;
+    std::string plot_filename_;
 
-  virtual ~DebugMPC();
+public:
+    DebugMPC();
 
-  int  GetPushCount();
-  void PushValues(double cte, double delta, double v ); 
-  void PushValues(double x, double y, double psi, double v, double cte, double epsi, double delta, double a);
+    virtual ~DebugMPC();
 
-  void Plot3();
-  void PlotAll();
+    int GetNumIterations();
+    void SetNumIterations(int num_iterations);
 
-    
+    void SetPlotFilename(std::string filename);
+
+    int GetPushCount();
+    void PushValues(double cte, double delta, double v);
+    void PushValues(double x, double y, double psi, double v, double cte, double epsi, double delta, double a);
+
+    void Plot3();
+    void PlotAll();
 };
 
 #endif /* DebugMPC_H */
