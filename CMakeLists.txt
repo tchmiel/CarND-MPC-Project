@@ -9,7 +9,7 @@ add_definitions(-std=c++11 -O3)
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
-set(sources src/MPC.cpp src/main.cpp)
+set(sources src/MPC.cpp src/main.cpp src/DebugMPC.cpp)
 
 include_directories(/usr/local/include)
 link_directories(/usr/local/lib)
@@ -25,5 +25,16 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 add_executable(mpc ${sources})
 
-target_link_libraries(mpc ipopt z ssl uv uWS)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+target_link_libraries(mpc ipopt  z ssl uv uWS python2.7)
+else()
+target_link_libraries(mpc ipopt  z ssl uv uWS python)
+endif()
+
+
+
+
+
+
+
 
