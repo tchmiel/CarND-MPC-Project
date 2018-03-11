@@ -9,7 +9,7 @@
 
 ----
 
-In this project, I implemented a Model Predictive Control to drive a vehicle around the Udacity Term 2 Simulator track.
+In this project, I implemented Model Predictive Control to drive a vehicle around the Udacity Term 2 Simulator track.
 
 The goals of this project were to:
 
@@ -226,4 +226,4 @@ for (unsigned int i = 0; i < N - 2; i++) {
 
 The cross track and steering angle errors were tuned first, then the smoothness of the turning and acceleration was tuned.  Last, the smoothness between actuations was tuned.  The vehicle was then able to navigate the simulator course at speeds up to 100 MPH!
 
-[![MPC Project Video](mpcproject.png)](https://www.youtube.com/watch?v=bk-t6PFPLVw)
+[![MPC Project Video](mpcproject.png)](https://youtu.be/IAWEwcCpVAo)
