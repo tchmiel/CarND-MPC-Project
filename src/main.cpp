@@ -103,15 +103,15 @@ int main(int argc, char* argv[])
                 int num_its = strtol(argv[++i], NULL, 10);
                 debugMPC.SetNumIterations(num_its); // Increment 'i' so we don't get the argument as the next argv[i].
                 cout << "Running simulator for " << debugMPC.GetNumIterations() << "!" << endl;
-            } else { // Uh-oh, there was no argument to the destination option.
+            } else { // Uh-oh, there was no argument to the plot option.
                 std::cerr << "--plot option requires one argument." << std::endl;
                 return 1;
             }
         } else if ((arg == "-f") || (arg == "--filename")) {
             if (i + 1 < argc) { // Make sure we aren't at the end of argv!
                 debugMPC.SetPlotFilename(argv[++i]); // Increment 'i' so we don't get the argument as the next argv[i].
-            } else { // Uh-oh, there was no argument to the destination option.
-                std::cerr << "--saveplot option requires one argument." << std::endl;
+            } else { // Uh-oh, there was no argument to the saveplot destination option.
+                std::cerr << "--filename option requires one argument." << std::endl;
                 return 1;
             }
         }
@@ -165,16 +165,36 @@ int main(int argc, char* argv[])
                     //double epsi = psi - atan(coeffs[1] + 2 * px * coeffs[2] + 3 coeffs[3] * pow (px, 2));
                     double epsi = -atan(coeffs[1]);
 
-                    //double steer_value = j[1]["steering_angle"];
-                    //double throttle_value = j[1]["throttle"];
-
-                    //use steering_angle and throttle, use for delay.
-                    //throttle is not the same as acceleration
-                    // for low delays, it will work as an estimator.
+                    // Lf, given for the simulator
+                    // Distance between front wheels to CoG (in meters)
+                   double Lf = 2.67;       
 
                     Eigen::VectorXd state(6);
-                    state << 0, 0, 0, v, cte, epsi;
+                   
+                    // Latency of 100ms
+                    bool includeLatency = true;
+                    if (includeLatency) {
 
+                      //use steering_angle and throttle, use for delay.
+                      //throttle is not the same as acceleration
+                      // for low delays, it will work as an estimator.
+                      double steer_value = j[1]["steering_angle"];
+                      double throttle_value = j[1]["throttle"];
+                      
+                      const double latency = 0.1;    // 100 ms 
+                      
+                      double lat_px = v * latency;
+                      double lat_py = 0.0;
+                      double lat_psi = v * -(steer_value / Lf) * latency;
+                      double lat_v = v + throttle_value * latency;
+                      double lat_cte = cte * v * sin(epsi) * latency;
+                      double lat_epsi = epsi + lat_psi;
+
+                      state << lat_px, lat_py, lat_psi, lat_v, lat_cte, lat_epsi;  
+                    } else {
+                      state << 0, 0, 0, v, cte, epsi;  // no latency
+                    }
+                    
                     auto vars = mpc.Solve(state, coeffs);
 
                     //Display the MPC predicted trajectory
@@ -204,8 +224,6 @@ int main(int argc, char* argv[])
                         next_y_vals.push_back(polyeval(coeffs, poly_inc * i));
                     }
 
-                    // Lf, given for the simulator
-                    double Lf = 2.67;
 
                     json msgJson;
                     // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
@@ -238,10 +256,11 @@ int main(int argc, char* argv[])
                     double v2 = vars[7];
 
                     debugMPC.PushValues(cte2, delta2, v2);
-
-                    if (debugMPC.GetPushCount() % debugMPC.GetNumIterations() == 0) {
-                        debugMPC.Plot3();
-                        exit(1);
+                    if (debugMPC.IsPlottingIterations()) {
+                      if (debugMPC.GetPushCount() % debugMPC.GetNumIterations() == 0) {
+                          debugMPC.Plot3();
+                          exit(1);
+                      }
                     }
                 }
             } else {

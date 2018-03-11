@@ -5,7 +5,7 @@
 
 using CppAD::AD;
 
-// TODO: Set the timestep length and duration
+// Set the timestep length and duration
 size_t N = 10;
 double dt = 0.1;
 
@@ -23,7 +23,7 @@ const double Lf = 2.67;
 
 const double ref_cte = 0; // reference of cte,
 const double ref_epsi = 0; // reference of epsi
-const double ref_v = 50; // reference of 100 mph
+const double ref_v = 100; // reference of 100 mph
 
 // vector offsets
 size_t x_start = 0;
@@ -44,7 +44,6 @@ public:
     typedef CPPAD_TESTVECTOR(AD<double>) ADvector;
     void operator()(ADvector& fg, const ADvector& vars)
     {
-        // TODO: implement MPC
         // `fg` a vector of the cost constraints, `vars` is a vector of variable values (state & actuators)
         // NOTE: You'll probably go back and forth between this function and
         // the Solver function below.
@@ -52,31 +51,31 @@ public:
         // cost function
         fg[0] = 0;
 
+        const double wgt_cte = 2500;
+        const double wgt_epsi = 2500;
+        const double wgt_v = 1;
+        const double wgt_delta_start = 10;
+        const double wgt_a_start = 10;
+        const double wgt_change_delta = 250;
+        const double wgt_change_a = 10;
+
         // Reference State Cost
         // tune by setting  coefficients to how much attention to pay attention to attributes
         for (unsigned int i = 0; i < N; i++) {
-            //1fg[0] += 2000 * CppAD::pow(vars[cte_start + i] - ref_cte, 2);
-            //1fg[0] += 2000 * CppAD::pow(vars[epsi_start + i] - ref_epsi, 2);
-            //1fg[0] += CppAD::pow(vars[v_start + i] - ref_v, 2);
-
-            fg[0] += CppAD::pow(vars[cte_start + i] - ref_cte, 2);
-            fg[0] += CppAD::pow(vars[epsi_start + i] - ref_epsi, 2);
-            fg[0] += CppAD::pow(vars[v_start + i] - ref_v, 2);
+            fg[0] += wgt_cte * CppAD::pow(vars[cte_start + i] - ref_cte, 2);
+            fg[0] += wgt_epsi * CppAD::pow(vars[epsi_start + i] - ref_epsi, 2);
+            fg[0] += wgt_v * CppAD::pow(vars[v_start + i] - ref_v, 2);
         }
 
         for (unsigned int i = 0; i < N - 1; i++) {
-            //1fg[0] += 5 * CppAD::pow(vars[delta_start + i], 2);
-            //1fg[0] += 5 * CppAD::pow(vars[a_start + i], 2);
-            fg[0] += CppAD::pow(vars[delta_start + i], 2);
-            fg[0] += CppAD::pow(vars[a_start + i], 2);
+            fg[0] += wgt_delta_start * CppAD::pow(vars[delta_start + i], 2);
+            fg[0] += wgt_a_start * CppAD::pow(vars[a_start + i], 2);
         }
 
         //delta_start = steering angle  jerkiness
         for (unsigned int i = 0; i < N - 2; i++) {
-            //1fg[0] += 200 * CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
-            //1fg[0] += 10 * CppAD::pow(vars[a_start + i + 1] -  vars[a_start + i], 2);
-            fg[0] += CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
-            fg[0] += CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
+            fg[0] += wgt_change_delta * CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
+            fg[0] += wgt_change_a * CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
         }
 
         // Setup Constraints
@@ -152,15 +151,13 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs)
     double cte = state[4];
     double epsi = state[5];
 
-    // TODO: Set the number of model variables (includes both states and inputs).
+    // Set the number of model variables (includes both states and inputs).
     // For example: If the state is a 4 element vector, the actuators is a 2
     // element vector and there are 10 timesteps. The number of variables is:
     //
-    // 4 * 10 + 2 * 9
-    //size_t n_vars = 0;
     size_t n_vars = N * 6 + (N - 1) * 2;
 
-    // TODO: Set the number of constraints
+    // Set the number of constraints
     //size_t n_constraints = 0;
     size_t n_constraints = N * 6;
 
@@ -256,16 +253,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs)
     // Cost
     auto cost = solution.obj_value;
     std::cout << "Cost " << cost << std::endl;
-    //return {solution.x[x_start + 1],   solution.x[y_start + 1],
-    //        solution.x[psi_start + 1], solution.x[v_start + 1],
-    //        solution.x[cte_start + 1], solution.x[epsi_start + 1],
-    //        solution.x[delta_start],   solution.x[a_start]};
-    // TODO: Return the first actuator values. The variables can be accessed with
-    // `solution.x[i]`.
-    //
-    // {...} is shorthand for creating a vector, so auto x1 = {1.0,2.0}
-    // creates a 2 element double vector.
-
+    
     vector<double> result;
     result.push_back(solution.x[delta_start]);
     result.push_back(solution.x[a_start]);

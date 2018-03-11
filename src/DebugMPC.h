@@ -25,6 +25,8 @@ public:
 
     virtual ~DebugMPC();
 
+    bool IsPlottingIterations();
+
     int GetNumIterations();
     void SetNumIterations(int num_iterations);
 

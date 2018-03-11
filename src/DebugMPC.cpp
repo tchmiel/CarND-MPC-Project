@@ -4,9 +4,16 @@
 
 namespace plt = matplotlibcpp;
 
-DebugMPC::DebugMPC() {}
+DebugMPC::DebugMPC() {
+  plotIterations_ = false;
+  num_iterations_ = 0;
+}
 
 DebugMPC::~DebugMPC() {}
+
+bool DebugMPC::IsPlottingIterations() {
+    return plotIterations_;
+}
 
 int DebugMPC::GetNumIterations()
 {
@@ -52,13 +59,7 @@ void DebugMPC::Plot3()
 {
     if (!plotIterations_)
         return;
-    cout << "AAAA" << cte_vals_.size() << " " << delta_vals_.size() << " " << v_vals_.size() << " " << endl;
-    cout << "plot3" << endl;
-    for (unsigned int j = 0; j < cte_vals_.size(); j++) {
-        cout << j << " " << cte_vals_[j] << " " << delta_vals_[j] << " " << v_vals_[j] << endl;
-    }
-    cout << endl;
-    //return;
+
     plt::subplot(3, 1, 1);
     plt::title("CTE");
     plt::plot(cte_vals_);
@@ -107,6 +108,5 @@ void DebugMPC::PlotAll()
     if (!plot_filename_.empty()) {
         plt::save(plot_filename_);
     }
-
     plt::show();
 }
